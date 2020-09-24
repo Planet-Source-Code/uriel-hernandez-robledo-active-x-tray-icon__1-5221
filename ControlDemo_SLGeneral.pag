@@ -1,0 +1,137 @@
+VERSION 5.00
+Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.1#0"; "COMDLG32.OCX"
+Begin VB.PropertyPage SLGeneral 
+   Caption         =   "General"
+   ClientHeight    =   2040
+   ClientLeft      =   0
+   ClientTop       =   0
+   ClientWidth     =   4920
+   PaletteMode     =   0  'Halftone
+   ScaleHeight     =   2040
+   ScaleWidth      =   4920
+   Begin VB.PictureBox Picture1 
+      BorderStyle     =   0  'None
+      Height          =   1215
+      Left            =   1440
+      ScaleHeight     =   1215
+      ScaleWidth      =   1575
+      TabIndex        =   3
+      Top             =   720
+      Width           =   1575
+   End
+   Begin VB.CommandButton cmdImagen 
+      Appearance      =   0  'Flat
+      Caption         =   "&Imagen"
+      Height          =   375
+      Left            =   240
+      TabIndex        =   2
+      Top             =   720
+      Width           =   975
+   End
+   Begin VB.CommandButton cmdToolTip 
+      Appearance      =   0  'Flat
+      Caption         =   "&ToolTip:"
+      Height          =   375
+      Left            =   240
+      TabIndex        =   1
+      Top             =   240
+      Width           =   975
+   End
+   Begin MSComDlg.CommonDialog com 
+      Left            =   4320
+      Top             =   1080
+      _ExtentX        =   847
+      _ExtentY        =   847
+      _Version        =   327680
+   End
+   Begin VB.TextBox txtTip 
+      Height          =   285
+      Left            =   1320
+      MaxLength       =   64
+      TabIndex        =   0
+      Top             =   330
+      Width           =   3375
+   End
+End
+Attribute VB_Name = "SLGeneral"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = True
+Attribute VB_PredeclaredId = False
+Attribute VB_Exposed = True
+
+
+Private Sub cmdImagen_Click()
+   Dim Path As String
+
+   On Error GoTo Error:
+   With com
+      .DialogTitle = "Archivos de tipo .ICO"
+      .DefaultExt = "*.ico"
+      .filename = "*.ico"
+      .Filter = "Archivos de iconos(*.ico)|*.*.ico"
+      .Flags = cdlOFNHideReadOnly
+      .CancelError = True
+      .ShowOpen
+   End With
+
+   Path = com.filename
+
+   If Path <> "" Then
+      Picture1.Picture = LoadPicture(Path)
+   End If
+     Changed = True
+      Picture1.Refresh
+      PropertyPage_ApplyChanges
+   Exit Sub
+Error:
+   If Err.Number = cdlCancel Then
+      Exit Sub
+   Else
+      MsgBox Err.Number & vbCrLf & Err.Description
+End If
+
+End Sub
+
+Private Sub cmdToolTip_Click()
+txtTip.SetFocus
+End Sub
+
+Private Sub PropertyPage_SelectionChanged()
+' Display the caption of the first control in
+'   the list of currently selected controls.
+Dim objControl
+    Picture1.Refresh
+    txtTip.Refresh
+    For Each objControl In SelectedControls
+          txtTip.Text = objControl.ToolTip
+              txtTip.Refresh
+          Picture1.Picture = objControl.Imagen
+          Picture1.Refresh
+    Next
+End Sub
+
+Private Sub PropertyPage_ApplyChanges()
+    ' Se usa una variable de tipo generico por si se seleccionan
+    ' mas de un tipo de controles
+   Dim objControl As Variant
+     
+    For Each objControl In SelectedControls
+        
+        objControl.ToolTip = Trim(txtTip.Text)
+        objControl.Imagen = Picture1
+        ' Changed = True
+    Next
+End Sub
+'Private Sub txtIDIcon_Change()
+    'If Not IsNumeric(txtIDIcon.Text) Then
+       ' On Error Resume Next
+        'txtIDIcon.SelStart = InStr(txtIDIcon.Text, Right(txtIDIcon.Text, 1)) - 1
+        'txtIDIcon.SelLength = 1
+        'Exit Sub
+    'End If
+    ' Changed = True
+    
+'End Sub
+Private Sub txtTip_Change()
+    Changed = True
+End Sub
